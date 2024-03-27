@@ -1,35 +1,38 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useRef } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
+import { Auth } from "./Componenets/Auth";
+import Chat from "./Componenets/chat";
+import Cookies from "universal-cookie";
+const cookies = new Cookies();
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
+  const [isAuth, setIsAuth] = useState(cookies.get("auth-token"));
+  const [room, setRoom] = useState(null);
+  const roomInputRef = useRef(null);
+  if (!isAuth) {
+    return (
       <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <Auth setIsAuth={setIsAuth} />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    );
+  }
+  return (
+    <div>
+      {room ? (
+        <Chat room={room} />
+      ) : (
+        <div>
+          <label>Enter Room Name:</label>
+          <input ref={roomInputRef} />
+          <button onClick={() => setRoom(roomInputRef.current.value)}>
+            Enter Chat
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
