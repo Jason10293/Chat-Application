@@ -23,10 +23,17 @@ function App() {
       {room ? (
         <Chat room={room} />
       ) : (
-        <div>
-          <label>Enter Room Name:</label>
-          <input ref={roomInputRef} />
-          <button onClick={() => setRoom(roomInputRef.current.value)}>
+        <div className="room-selection">
+          <label className="room-input-text">Enter Room Name:</label>
+          <input
+            placeholder="Enter Room Name"
+            className="room-input"
+            ref={roomInputRef}
+          />
+          <button
+            className="enter-chat-button"
+            onClick={() => setRoom(roomInputRef.current.value)}
+          >
             Enter Chat
           </button>
         </div>

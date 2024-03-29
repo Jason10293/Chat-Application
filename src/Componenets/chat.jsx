@@ -6,6 +6,7 @@ import {
   serverTimestamp,
   onSnapshot,
   where,
+  orderBy,
 } from "firebase/firestore";
 import { auth, db } from "../firebase-config";
 export default function Chat({ room }) {
@@ -13,10 +14,14 @@ export default function Chat({ room }) {
   const [messages, setMessages] = useState([]);
   const messagesRef = collection(db, "messages");
   useEffect(() => {
-    const queryMessages = query(messagesRef, where("room", "==", room));
-    onSnapshot(queryMessages, (snapshot) => {
+    const queryMessages = query(
+      messagesRef,
+      where("room", "==", room),
+      orderBy("createdAt")
+    );
+    const unsubscribe = onSnapshot(queryMessages, (snapshot) => {
       let messages = [];
-      const unsubscribe = snapshot.forEach((doc) => {
+      snapshot.forEach((doc) => {
         messages.push({
           ...doc.data(),
           id: doc.id,
@@ -40,8 +45,9 @@ export default function Chat({ room }) {
     setNewMessage("");
   };
   return (
-    <div>
-      <div>
+    <div className="chat-container">
+      <div className="friend-list">Friend</div>
+      <div className="messages-container">
         {messages.map((message) => (
           <h1>{message.text}</h1>
         ))}
@@ -51,8 +57,11 @@ export default function Chat({ room }) {
           placeholder="Type your message here"
           onChange={(e) => setNewMessage(e.target.value)}
           value={newMessage}
+          className="message-text-box"
         />
-        <button type="submit">Send</button>
+        <button type="submit" className="send-message-button">
+          Send
+        </button>
       </form>
     </div>
   );
