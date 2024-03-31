@@ -2,11 +2,9 @@ import { useState, useRef } from "react";
 import "./App.css";
 import { Auth } from "./Componenets/Auth";
 import Chat from "./Componenets/chat";
-import Cookies from "universal-cookie";
-const cookies = new Cookies();
 
 function App() {
-  const [isAuth, setIsAuth] = useState(cookies.get("auth-token"));
+  const [isAuth, setIsAuth] = useState(false);
   const [room, setRoom] = useState(null);
   const roomInputRef = useRef(null);
   if (!isAuth) {

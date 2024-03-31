@@ -9,6 +9,7 @@ import {
   onSnapshot,
   where,
   orderBy,
+  getDocs,
 } from "firebase/firestore";
 export default function Chat({ room }) {
   const [uid, setUid] = useState("");
@@ -16,27 +17,38 @@ export default function Chat({ room }) {
   const [userDisplayName, setUserDisplayName] = useState("");
 
   const auth = getAuth();
+
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
+    const updateDB = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUid(user.uid);
         setUserPfp(user.photoURL);
         setUserDisplayName(user.displayName);
+
+        const q = query(usersRef, where("email", "==", user.email));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+          await addDoc(usersRef, {
+            displayName: user.displayName,
+            email: user.email,
+          });
+        }
       }
     });
+    return () => updateDB();
   }, []);
-  console.log(userPfp);
-  console.log(userDisplayName);
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const messagesRef = collection(db, "messages");
+  const usersRef = collection(db, "users");
+
   useEffect(() => {
     const queryMessages = query(
       messagesRef,
       where("room", "==", room),
       orderBy("createdAt")
     );
-    const unsubscribe = onSnapshot(queryMessages, (snapshot) => {
+    const updateMessages = onSnapshot(queryMessages, (snapshot) => {
       let messages = [];
       snapshot.forEach((doc) => {
         messages.push({
@@ -44,10 +56,10 @@ export default function Chat({ room }) {
           id: doc.id,
           userId: doc.data().userId,
         });
-        setMessages(messages);
       });
+      setMessages(messages);
     });
-    return () => unsubscribe();
+    return () => updateMessages();
   }, []);
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -58,8 +70,10 @@ export default function Chat({ room }) {
       createdAt: serverTimestamp(),
       user: auth.currentUser.displayName,
       userId: auth.currentUser.uid,
+      pfp: auth.currentUser.photoURL,
       room: room,
     });
+
     setNewMessage("");
   };
   return (
