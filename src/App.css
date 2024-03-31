@@ -22,20 +22,20 @@ body {
 
 .chat-container {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(11, 1fr);
   grid-template-areas:
-    "Friends Messages Messages Messages Messages"
-    "Friends Messages Messages Messages Messages"
-    "Friends Messages Messages Messages Messages"
-    "Friends Messages Messages Messages Messages"
-    "Friends Messages Messages Messages Messages"
-    "Friends Messages Messages Messages Messages"
-    "Friends Messages Messages Messages Messages"
-    "Friends Messages Messages Messages Messages"
-    "Friends Messages Messages Messages Messages"
-    "Friends Messages Messages Messages Messages"
-    "Friends Message-input Message-input Message-input Message-input";
+    "Friends Friends Header Header Header Header Header Header Header Header"
+    "Friends Friends Messages Messages Messages Messages Messages Messages Messages Messages"
+    "Friends Friends Messages Messages Messages Messages Messages Messages Messages Messages"
+    "Friends Friends Messages Messages Messages Messages Messages Messages Messages Messages"
+    "Friends Friends Messages Messages Messages Messages Messages Messages Messages Messages"
+    "Friends Friends Messages Messages Messages Messages Messages Messages Messages Messages"
+    "Friends Friends Messages Messages Messages Messages Messages Messages Messages Messages"
+    "Friends Friends Messages Messages Messages Messages Messages Messages Messages Messages"
+    "Friends Friends Messages Messages Messages Messages Messages Messages Messages Messages"
+    "Friends Friends Messages Messages Messages Messages Messages Messages Messages Messages"
+    "User User Message-input Message-input Message-input Message-input Message-input Message-input Message-input Message-input";
   /* border: 1px red solid; */
   width: 80vw;
   height: 40vw;
@@ -43,10 +43,10 @@ body {
   background-color: rgba(10, 10, 20, 255);
 }
 .message-text-box {
+  grid-area: Message-input;
   font-family: "Josefin Sans", sans-serif;
   font-size: 1rem;
   box-sizing: border-box;
-  grid-area: Message-input;
   grid-column: span 4;
   height: 90%;
   width: 90%;
@@ -58,9 +58,9 @@ body {
   outline: none;
 }
 .send-message-button {
+  grid-area: Message-input;
   font-family: "Josefin Sans", sans-serif;
   position: absolute;
-  grid-area: Message-input;
   grid-column-start: 5;
   background-color: rgb(156, 132, 248);
   height: 90%;
@@ -81,12 +81,13 @@ body {
   justify-content: center;
   align-items: end;
   position: relative;
-  grid-column: span 4;
+  grid-column: span 8;
   width: 100%;
 }
 
 .messages-container {
   padding: 10px;
+  overflow-y: auto;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -96,7 +97,7 @@ body {
 
 .message-curr-user,
 .message-other-user {
-  width: 50%;
+  width: fit-content;
   box-sizing: border-box;
   padding: 10px 10px;
   border-radius: 10px;
@@ -113,4 +114,24 @@ body {
   text-align: left;
   background-color: rgb(32, 20, 52);
   color: white;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-area: User;
+}
+
+.user-pfp {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+}
+
+.display-name {
+  margin: 0px;
+  margin-left: 8px;
+  height: auto;
+  word-break: break-all;
 }

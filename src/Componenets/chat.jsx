@@ -12,21 +12,21 @@ import {
 } from "firebase/firestore";
 export default function Chat({ room }) {
   const [uid, setUid] = useState("");
+  const [userPfp, setUserPfp] = useState("");
+  const [userDisplayName, setUserDisplayName] = useState("");
+
   const auth = getAuth();
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/auth.user
         setUid(user.uid);
-        // ...
+        setUserPfp(user.photoURL);
+        setUserDisplayName(user.displayName);
       }
     });
   }, []);
-
-  console.log(uid);
-  //n2lF6p7cNgU65uiEVWWACaNhNTH2
-  //NIC07By2Q9cvhuAe3eWDUoqlb2R2
+  console.log(userPfp);
+  console.log(userDisplayName);
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const messagesRef = collection(db, "messages");
@@ -42,7 +42,7 @@ export default function Chat({ room }) {
         messages.push({
           ...doc.data(),
           id: doc.id,
-          userId: doc.data().userId, // add this line
+          userId: doc.data().userId,
         });
         setMessages(messages);
       });
@@ -64,7 +64,12 @@ export default function Chat({ room }) {
   };
   return (
     <div className="chat-container">
+      <div className="header">Hello</div>
       <div className="friend-list">Friend</div>
+      <div className="user">
+        <img src={userPfp} alt="" className="user-pfp" />
+        <h3 className="display-name">{userDisplayName}</h3>
+      </div>
       <div className="messages-container">
         {messages.map((message) => (
           <div className="message" key={message.id}>
