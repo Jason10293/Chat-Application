@@ -2,20 +2,25 @@ import { useState, useRef } from "react";
 import "./App.css";
 import { Auth } from "./Componenets/Auth";
 import Chat from "./Componenets/chat";
+import { ChakraProvider } from "@chakra-ui/react";
 
 function App() {
   const [isAuth, setIsAuth] = useState(false);
   if (!isAuth) {
     return (
-      <div>
-        <Auth setIsAuth={setIsAuth} />
-      </div>
+      <ChakraProvider>
+        <div>
+          <Auth setIsAuth={setIsAuth} />
+        </div>
+      </ChakraProvider>
     );
   }
   return (
-    <div>
-      <Chat />
-    </div>
+    <ChakraProvider>
+      <div>
+        <Chat />
+      </div>
+    </ChakraProvider>
   );
 }
 
