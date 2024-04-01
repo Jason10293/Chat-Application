@@ -67,7 +67,7 @@ body {
     "Friends Friends Messages Messages Messages Messages Messages Messages Messages Messages"
     "Friends Friends Messages Messages Messages Messages Messages Messages Messages Messages"
     "Friends Friends Messages Messages Messages Messages Messages Messages Messages Messages"
-    "Friends Friends Messages Messages Messages Messages Messages Messages Messages Messages"
+    "Add-Friend Add-Friend Messages Messages Messages Messages Messages Messages Messages Messages"
     "User User Message-input Message-input Message-input Message-input Message-input Message-input Message-input Message-input";
   width: 80vw;
   height: 40vw;
@@ -77,14 +77,14 @@ body {
 .message-text-box {
   grid-area: Message-input;
   font-family: "Josefin Sans", sans-serif;
-  font-size: 1rem;
+  font-size: 1vw;
   box-sizing: border-box;
   grid-column: span 4;
   height: 90%;
   width: 90%;
   border-radius: 2em;
   border: none;
-  padding-left: 10px;
+  padding-left: 30px;
 }
 .message-text-box:focus {
   outline: none;
@@ -93,25 +93,44 @@ body {
   grid-area: Message-input;
   font-family: "Josefin Sans", sans-serif;
   position: absolute;
-  grid-column-start: 5;
+  grid-column-start: 6;
   background-color: rgb(156, 132, 248);
   height: 90%;
-  bottom: 0px;
+  bottom: px;
   right: 5%;
-  width: 6em;
+  width: 5.5em;
   border-radius: 2em;
+  font-size: 1.2vw;
 }
 
+.add-friend-button {
+  border-radius: 0px 0px 10px;
+  padding: 0px;
+  grid-column: span 2;
+  width: 100%;
+  border: none;
+  font-size: 1.2vw;
+  font-weight: 500;
+  font-family: inherit;
+  border: 1px solid transparent;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+.add-friend-button:hover {
+  border-color: #646cff;
+}
 .friend-list {
   background-color: #10041c;
-  border-radius: 10px;
+  border-radius: 10px 10px 0px 0px;
   grid-area: Friends;
 }
 
 .chat-message-form {
   display: flex;
   justify-content: center;
-  align-items: end;
+  align-items: start;
   position: relative;
   grid-column: span 8;
   width: 100%;
@@ -155,12 +174,13 @@ body {
 }
 
 .user-pfp {
-  width: 2rem;
-  height: 2rem;
+  width: 2.5vw;
+  height: 2.5vw;
   border-radius: 50%;
 }
 
 .display-name {
+  font-size: 1.2vw;
   margin: 0px;
   margin-left: 8px;
   height: auto;

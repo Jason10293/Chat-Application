@@ -13,10 +13,10 @@ import {
   orderBy,
   getDocs,
 } from "firebase/firestore";
-export default function Chat({ room }) {
+export default function Chat() {
   const [userInfo, setUserInfo] = useState({});
-  const [otherUserInfo, setOtherUserInfo] = useState({});
-  const [tempRoom, setTempRoom] = useState(room);
+  const [friends, setFriends] = useState([]);
+  const [room, setRoom] = useState("");
   const auth = getAuth();
   useEffect(() => {
     const updateDB = onAuthStateChanged(auth, async (user) => {
@@ -47,7 +47,7 @@ export default function Chat({ room }) {
   useEffect(() => {
     const queryMessages = query(
       messagesRef,
-      where("room", "==", tempRoom),
+      where("room", "==", room),
       orderBy("createdAt")
     );
     const updateMessages = onSnapshot(queryMessages, (snapshot) => {
@@ -62,11 +62,10 @@ export default function Chat({ room }) {
       setMessages(messages);
     });
     return () => updateMessages();
-  }, [tempRoom]);
+  }, [room]);
 
   function changeRoom(otherUserUid) {
-    console.log("changed");
-    setTempRoom("asdfasdfasdfasdf");
+    setRoom("asdfasdfasdfasdf");
   }
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -78,12 +77,14 @@ export default function Chat({ room }) {
       user: auth.currentUser.displayName,
       userId: auth.currentUser.uid,
       pfp: auth.currentUser.photoURL,
-      room: tempRoom,
+      room: room,
     });
 
     setNewMessage("");
   };
-  console.log(tempRoom);
+  function addFriend() {
+    console.log("Clicked");
+  }
   return (
     <div className="chat-container">
       <div className="header">
@@ -107,6 +108,12 @@ export default function Chat({ room }) {
           </div>
         ))}
       </div>
+      <button onClick={addFriend} className="add-friend-button">
+        Add Friend
+      </button>
+      {/* <div className="add-friend-container">
+        <img src="src/assets/plus.png" alt="" />
+      </div> */}
       <form className="chat-message-form" onSubmit={handleSubmit}>
         <input
           placeholder="Type your message here"

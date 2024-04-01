@@ -5,8 +5,6 @@ import Chat from "./Componenets/chat";
 
 function App() {
   const [isAuth, setIsAuth] = useState(false);
-  const [room, setRoom] = useState(null);
-  const roomInputRef = useRef(null);
   if (!isAuth) {
     return (
       <div>
@@ -16,24 +14,7 @@ function App() {
   }
   return (
     <div>
-      {room ? (
-        <Chat room={room} />
-      ) : (
-        <div className="room-selection">
-          <label className="room-input-text">Enter Room Name:</label>
-          <input
-            placeholder="Enter Room Name"
-            className="room-input"
-            ref={roomInputRef}
-          />
-          <button
-            className="enter-chat-button"
-            onClick={() => setRoom(roomInputRef.current.value)}
-          >
-            Enter Chat
-          </button>
-        </div>
-      )}
+      <Chat />
     </div>
   );
 }
