@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../firebase-config";
+import Header from "./Header";
 import {
+  doc,
   addDoc,
   collection,
   query,
@@ -12,25 +14,25 @@ import {
   getDocs,
 } from "firebase/firestore";
 export default function Chat({ room }) {
-  const [uid, setUid] = useState("");
-  const [userPfp, setUserPfp] = useState("");
-  const [userDisplayName, setUserDisplayName] = useState("");
-
+  const [userInfo, setUserInfo] = useState({});
+  const [otherUserInfo, setOtherUserInfo] = useState({});
+  const [tempRoom, setTempRoom] = useState(room);
   const auth = getAuth();
-
   useEffect(() => {
     const updateDB = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUid(user.uid);
-        setUserPfp(user.photoURL);
-        setUserDisplayName(user.displayName);
-
+        setUserInfo({
+          uid: user.uid,
+          displayName: user.displayName,
+          pfp: user.photoURL,
+        });
         const q = query(usersRef, where("email", "==", user.email));
         const querySnapshot = await getDocs(q);
         if (querySnapshot.empty) {
           await addDoc(usersRef, {
             displayName: user.displayName,
             email: user.email,
+            pfp: user.photoURL,
           });
         }
       }
@@ -41,11 +43,11 @@ export default function Chat({ room }) {
   const [messages, setMessages] = useState([]);
   const messagesRef = collection(db, "messages");
   const usersRef = collection(db, "users");
-
+  // console.log(userInfo.pfp);
   useEffect(() => {
     const queryMessages = query(
       messagesRef,
-      where("room", "==", room),
+      where("room", "==", tempRoom),
       orderBy("createdAt")
     );
     const updateMessages = onSnapshot(queryMessages, (snapshot) => {
@@ -60,7 +62,12 @@ export default function Chat({ room }) {
       setMessages(messages);
     });
     return () => updateMessages();
-  }, []);
+  }, [tempRoom]);
+
+  function changeRoom(otherUserUid) {
+    console.log("changed");
+    setTempRoom("asdfasdfasdfasdf");
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (newMessage === "") return;
@@ -71,25 +78,28 @@ export default function Chat({ room }) {
       user: auth.currentUser.displayName,
       userId: auth.currentUser.uid,
       pfp: auth.currentUser.photoURL,
-      room: room,
+      room: tempRoom,
     });
 
     setNewMessage("");
   };
+  console.log(tempRoom);
   return (
     <div className="chat-container">
-      <div className="header">Hello</div>
+      <div className="header">
+        <Header onClick={changeRoom} />
+      </div>
       <div className="friend-list">Friend</div>
       <div className="user">
-        <img src={userPfp} alt="" className="user-pfp" />
-        <h3 className="display-name">{userDisplayName}</h3>
+        <img src={userInfo.pfp} alt="" className="user-pfp" />
+        <h3 className="display-name">{userInfo.displayName}</h3>
       </div>
       <div className="messages-container">
         {messages.map((message) => (
           <div className="message" key={message.id}>
             <div
               className={`message-${
-                message.userId === uid ? "curr-user" : "other-user"
+                message.userId === userInfo.uid ? "curr-user" : "other-user"
               }`}
             >
               {message.text}
