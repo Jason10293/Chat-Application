@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../firebase-config";
 import Header from "./Header";
+import AddFriend from "./AddFriend";
 import {
   doc,
   addDoc,
@@ -108,12 +109,7 @@ export default function Chat() {
           </div>
         ))}
       </div>
-      <button onClick={addFriend} className="add-friend-button">
-        Add Friend
-      </button>
-      {/* <div className="add-friend-container">
-        <img src="src/assets/plus.png" alt="" />
-      </div> */}
+      <AddFriend />
       <form className="chat-message-form" onSubmit={handleSubmit}>
         <input
           placeholder="Type your message here"
