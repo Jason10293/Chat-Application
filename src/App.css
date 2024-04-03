@@ -2,22 +2,11 @@
 body {
   font-family: "Josefin Sans", sans-serif;
 }
-.room-selection {
-  display: grid;
-  place-items: center;
-}
-.enter-chat-button {
-  margin-top: 10px;
-}
 .room-input {
   height: 25px;
   width: 200px;
   margin-top: 5px;
   padding-left: 5px;
-}
-
-.room-input-text {
-  font-size: 1rem;
 }
 
 .auth {
@@ -85,6 +74,7 @@ body {
   border-radius: 2em;
   border: none;
   padding-left: 30px;
+  color: black;
 }
 .message-text-box:focus {
   outline: none;
@@ -149,6 +139,7 @@ body {
 
 .message-curr-user,
 .message-other-user {
+  font-family: "Josefin Sans";
   width: fit-content;
   box-sizing: border-box;
   padding: 10px 10px;
@@ -185,4 +176,24 @@ body {
   margin-left: 8px;
   height: auto;
   word-break: break-all;
+}
+.friend-button {
+  height: 125px;
+  padding: 5px;
+  border: 2px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.friend-button > h1 {
+  margin-left: 15px;
+  font-family: "Josefin Sans", sans-serif;
+  font-size: 1.8vw;
+}
+.friend-button > img {
+  border-radius: 50%;
+  width: 4vw;
+  height: 4vw;
 }

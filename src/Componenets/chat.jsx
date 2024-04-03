@@ -14,6 +14,7 @@ import {
   orderBy,
   getDocs,
 } from "firebase/firestore";
+import Friend from "./Friend";
 export default function Chat() {
   const [userInfo, setUserInfo] = useState({});
   const [friends, setFriends] = useState([]);
@@ -34,6 +35,7 @@ export default function Chat() {
             displayName: user.displayName,
             email: user.email,
             pfp: user.photoURL,
+            uid: user.uid,
           });
         }
       }
@@ -44,7 +46,6 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const messagesRef = collection(db, "messages");
   const usersRef = collection(db, "users");
-  // console.log(userInfo.pfp);
   useEffect(() => {
     const queryMessages = query(
       messagesRef,
@@ -65,8 +66,20 @@ export default function Chat() {
     return () => updateMessages();
   }, [room]);
 
+  function addFriend(displayName, pfp) {
+    friends.push({
+      displayName: displayName,
+      pfp: pfp,
+    });
+    console.log(friends);
+    changeRoom(userInfo.uid);
+  }
+
+  const friendElements = friends.map((friend) => (
+    <Friend displayName={friend.displayName} pfp={friend.pfp} />
+  ));
   function changeRoom(otherUserUid) {
-    setRoom("asdfasdfasdfasdf");
+    setRoom(otherUserUid);
   }
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -83,15 +96,13 @@ export default function Chat() {
 
     setNewMessage("");
   };
-  function addFriend() {
-    console.log("Clicked");
-  }
   return (
     <div className="chat-container">
       <div className="header">
-        <Header onClick={changeRoom} />
+        {/* Have change room function */}
+        <Header />
       </div>
-      <div className="friend-list">Friend</div>
+      <div className="friend-list">{friendElements}</div>
       <div className="user">
         <img src={userInfo.pfp} alt="" className="user-pfp" />
         <h3 className="display-name">{userInfo.displayName}</h3>
@@ -109,7 +120,7 @@ export default function Chat() {
           </div>
         ))}
       </div>
-      <AddFriend />
+      <AddFriend addFriend={addFriend} />
       <form className="chat-message-form" onSubmit={handleSubmit}>
         <input
           placeholder="Type your message here"

@@ -13,14 +13,38 @@ import {
   FormLabel,
   Input,
 } from "@chakra-ui/react";
+import { db } from "../firebase-config";
+import {
+  doc,
+  addDoc,
+  collection,
+  query,
+  serverTimestamp,
+  onSnapshot,
+  where,
+  getDocs,
+} from "firebase/firestore";
 
-export default function Header() {
+export default function Header({ addFriend }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [email, setEmail] = useState();
+  const usersRef = collection(db, "users");
   const initialRef = React.useRef(null);
   const finalRef = React.useRef(null);
-  function handleSave() {
-    console.log(email);
+  async function handleSave() {
+    const q = query(usersRef, where("email", "==", email));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      //Get user information
+      const data = querySnapshot.docs[0].data();
+      const displayName = data.displayName;
+      const pfp = data.pfp;
+
+      addFriend(displayName, pfp);
+    } else {
+      //Make a modal that shows not found?
+      console.log("not found");
+    }
   }
   function handleSaveAndClose() {
     handleSave();
@@ -59,7 +83,6 @@ export default function Header() {
               <FormLabel color="black">Email</FormLabel>
               <Input
                 placeholder="Email"
-                value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 color="black"
               />
@@ -68,7 +91,7 @@ export default function Header() {
 
           <ModalFooter>
             <Button onClick={handleSaveAndClose} colorScheme="blue" mr={3}>
-              Save
+              Add
             </Button>
             <Button onClick={onClose}>Cancel</Button>
           </ModalFooter>
