@@ -74,28 +74,33 @@ export default function Chat() {
       console.log("Can't add yourself");
       return;
     }
-    friends.push({
-      displayName: otherDisplayName,
-      pfp: otherPfp,
-    });
+    updateFriendList(otherUid, otherDisplayName, otherPfp);
     changeRoom(userInfo.uid);
   }
-  async function updateFriendList(otherUid) {
-    const roomId = crypto.randomUUID();
-
-    const q = query(usersRef, where("uid", "==", userInfo.uid));
+  async function updateFriendsList(
+    uid,
+    otherUid,
+    otherDisplayName,
+    otherPfp,
+    roomId
+  ) {
+    const q = query(usersRef, where("uid", "==", uid));
     const querySnapshot = await getDocs(q);
-    const docRef = doc(usersRef, querySnapshot.docs[0].id);
-    const userDoc = await getDoc(docRef);
 
     if (!querySnapshot.empty) {
-      // If the document exists, update the friendsList field
+      const docRef = doc(usersRef, querySnapshot.docs[0].id);
+      const userDoc = await getDoc(docRef);
+
       await setDoc(
         docRef,
         {
           friendsList: {
             ...(userDoc.data()?.friendsList || {}),
-            [otherUid]: roomId,
+            [otherUid]: {
+              roomId: roomId,
+              displayName: otherDisplayName,
+              pfp: otherPfp,
+            },
           },
         },
         { merge: true }
@@ -103,26 +108,25 @@ export default function Chat() {
     } else {
       console.log("Document does not exist");
     }
+  }
 
-    const otherUserQ = query(usersRef, where("uid", "==", otherUid));
-    const otherUserQuerySnapshot = await getDocs(otherUserQ);
-    const otherUserDocRef = doc(usersRef, otherUserQuerySnapshot.docs[0].id);
-    const otherUserDoc = await getDoc(otherUserDocRef);
+  async function updateFriendList(otherUid, otherDisplayName, otherPfp) {
+    const roomId = crypto.randomUUID();
 
-    if (!otherUserQuerySnapshot.empty) {
-      await setDoc(
-        otherUserDocRef,
-        {
-          friendsList: {
-            ...(otherUserDoc.data()?.friendsList || {}),
-            [userInfo.uid]: roomId,
-          },
-        },
-        { merge: true }
-      );
-    } else {
-      console.log("Document does not exist");
-    }
+    await updateFriendsList(
+      userInfo.uid,
+      otherUid,
+      otherDisplayName,
+      otherPfp,
+      roomId
+    );
+    await updateFriendsList(
+      otherUid,
+      userInfo.uid,
+      userInfo.displayName,
+      userInfo.pfp,
+      roomId
+    );
   }
   const friendElements = friends.map((friend) => (
     <Friend displayName={friend.displayName} pfp={friend.pfp} />
