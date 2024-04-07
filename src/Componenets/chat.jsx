@@ -12,6 +12,9 @@ import {
   onSnapshot,
   where,
   orderBy,
+  setDoc,
+  updateDoc,
+  getDoc,
   getDocs,
 } from "firebase/firestore";
 import Friend from "./Friend";
@@ -66,15 +69,61 @@ export default function Chat() {
     return () => updateMessages();
   }, [room]);
 
-  function addFriend(displayName, pfp) {
+  function addFriend(otherDisplayName, otherPfp, otherUid) {
+    if (otherUid === userInfo.uid) {
+      console.log("Can't add yourself");
+      return;
+    }
     friends.push({
-      displayName: displayName,
-      pfp: pfp,
+      displayName: otherDisplayName,
+      pfp: otherPfp,
     });
-    console.log(friends);
     changeRoom(userInfo.uid);
   }
+  async function updateFriendList(otherUid) {
+    const roomId = crypto.randomUUID();
 
+    const q = query(usersRef, where("uid", "==", userInfo.uid));
+    const querySnapshot = await getDocs(q);
+    const docRef = doc(usersRef, querySnapshot.docs[0].id);
+    const userDoc = await getDoc(docRef);
+
+    if (!querySnapshot.empty) {
+      // If the document exists, update the friendsList field
+      await setDoc(
+        docRef,
+        {
+          friendsList: {
+            ...(userDoc.data()?.friendsList || {}),
+            [otherUid]: roomId,
+          },
+        },
+        { merge: true }
+      );
+    } else {
+      console.log("Document does not exist");
+    }
+
+    const otherUserQ = query(usersRef, where("uid", "==", otherUid));
+    const otherUserQuerySnapshot = await getDocs(otherUserQ);
+    const otherUserDocRef = doc(usersRef, otherUserQuerySnapshot.docs[0].id);
+    const otherUserDoc = await getDoc(otherUserDocRef);
+
+    if (!otherUserQuerySnapshot.empty) {
+      await setDoc(
+        otherUserDocRef,
+        {
+          friendsList: {
+            ...(otherUserDoc.data()?.friendsList || {}),
+            [userInfo.uid]: roomId,
+          },
+        },
+        { merge: true }
+      );
+    } else {
+      console.log("Document does not exist");
+    }
+  }
   const friendElements = friends.map((friend) => (
     <Friend displayName={friend.displayName} pfp={friend.pfp} />
   ));
@@ -100,7 +149,7 @@ export default function Chat() {
     <div className="chat-container">
       <div className="header">
         {/* Have change room function */}
-        <Header />
+        <Header notFunction={updateFriendList} />
       </div>
       <div className="friend-list">{friendElements}</div>
       <div className="user">

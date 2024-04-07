@@ -14,16 +14,7 @@ import {
   Input,
 } from "@chakra-ui/react";
 import { db } from "../firebase-config";
-import {
-  doc,
-  addDoc,
-  collection,
-  query,
-  serverTimestamp,
-  onSnapshot,
-  where,
-  getDocs,
-} from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 
 export default function Header({ addFriend }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -39,8 +30,8 @@ export default function Header({ addFriend }) {
       const data = querySnapshot.docs[0].data();
       const displayName = data.displayName;
       const pfp = data.pfp;
-
-      addFriend(displayName, pfp);
+      const uid = data.uid;
+      addFriend(displayName, pfp, uid);
     } else {
       //Make a modal that shows not found?
       console.log("not found");
