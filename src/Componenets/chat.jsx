@@ -69,24 +69,18 @@ export default function Chat() {
     return () => updateMessages();
   }, [room]);
 
-  function addFriend(otherDisplayName, otherPfp, otherUid) {
+  async function addFriend(otherDisplayName, otherPfp, otherUid) {
     if (otherUid === userInfo.uid) {
       console.log("Can't add yourself");
       return;
     }
     updateFriendList(otherUid, otherDisplayName, otherPfp);
-    changeRoom(userInfo.uid);
+    await updateFriendListUI();
   }
-  async function updateFriendsList(
-    uid,
-    otherUid,
-    otherDisplayName,
-    otherPfp,
-    roomId
-  ) {
+  async function updateFriendsList(uid, otherUid, otherDisplayName, otherPfp) {
     const q = query(usersRef, where("uid", "==", uid));
     const querySnapshot = await getDocs(q);
-
+    const roomId = crypto.randomUUID();
     if (!querySnapshot.empty) {
       const docRef = doc(usersRef, querySnapshot.docs[0].id);
       const userDoc = await getDoc(docRef);
@@ -110,9 +104,12 @@ export default function Chat() {
     }
   }
 
-  async function updateFriendList(otherUid, otherDisplayName, otherPfp) {
-    const roomId = crypto.randomUUID();
-
+  async function updateFriendList(
+    otherUid,
+    otherDisplayName,
+    otherPfp,
+    roomId
+  ) {
     await updateFriendsList(
       userInfo.uid,
       otherUid,
@@ -128,9 +125,32 @@ export default function Chat() {
       roomId
     );
   }
-  const friendElements = friends.map((friend) => (
-    <Friend displayName={friend.displayName} pfp={friend.pfp} />
-  ));
+
+  async function updateFriendListUI() {
+    // Need display name and friend profile picture
+    const q = query(usersRef, where("uid", "==", userInfo.uid));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      const userFriendList = querySnapshot.docs[0].data().friendsList;
+      let userPropertiesArr = Object.entries(userFriendList);
+      userPropertiesArr.map((user) => {
+        const displayName = user[1].displayName;
+        const pfp = user[1].pfp;
+        setFriends((prevValue) => {
+          return [...prevValue, <Friend displayName={displayName} pfp={pfp} />];
+        });
+      });
+    } else {
+      console.log("empty");
+    }
+  }
+  useEffect(() => {
+    const fetchAndUpdateFriendList = async () => {
+      await updateFriendListUI();
+    };
+
+    fetchAndUpdateFriendList();
+  }, [userInfo]);
   function changeRoom(otherUserUid) {
     setRoom(otherUserUid);
   }
@@ -152,10 +172,9 @@ export default function Chat() {
   return (
     <div className="chat-container">
       <div className="header">
-        {/* Have change room function */}
-        <Header notFunction={updateFriendList} />
+        <Header notFunction={updateFriendListUI} />
       </div>
-      <div className="friend-list">{friendElements}</div>
+      <div className="friend-list">{friends}</div>
       <div className="user">
         <img src={userInfo.pfp} alt="" className="user-pfp" />
         <h3 className="display-name">{userInfo.displayName}</h3>
