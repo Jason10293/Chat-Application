@@ -47,9 +47,10 @@ export default function Header({ addFriend }) {
         color="white"
         backgroundColor="#1a1a1a"
         width="100%"
-        gridColumn="span 2"
         height="100%"
         fontSize="1.2vw"
+        gridRow="span 1"
+        gridRowEnd="11"
         _hover={{ background: "rgb(32,28,28)" }}
         onClick={onOpen}
       >

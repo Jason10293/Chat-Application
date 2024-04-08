@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../firebase-config";
 import Header from "./Header";
-import AddFriend from "./AddFriend";
+import FriendList from "./FriendList.";
 import {
-  doc,
   addDoc,
   collection,
   query,
@@ -12,25 +11,26 @@ import {
   onSnapshot,
   where,
   orderBy,
-  setDoc,
-  updateDoc,
-  getDoc,
   getDocs,
 } from "firebase/firestore";
-import Friend from "./Friend";
+
 export default function Chat() {
   const [userInfo, setUserInfo] = useState({});
-  const [friends, setFriends] = useState([]);
+
   const [room, setRoom] = useState("");
   const auth = getAuth();
+
+  //Updates the DB with user's information and stores the information in state as well
   useEffect(() => {
     const updateDB = onAuthStateChanged(auth, async (user) => {
+      //If user logged in
       if (user) {
         setUserInfo({
           uid: user.uid,
           displayName: user.displayName,
           pfp: user.photoURL,
         });
+        //Queries the database and adds the user's information to the database
         const q = query(usersRef, where("email", "==", user.email));
         const querySnapshot = await getDocs(q);
         if (querySnapshot.empty) {
@@ -50,11 +50,14 @@ export default function Chat() {
   const messagesRef = collection(db, "messages");
   const usersRef = collection(db, "users");
   useEffect(() => {
+    //Orders the rooms by time created
     const queryMessages = query(
       messagesRef,
       where("room", "==", room),
       orderBy("createdAt")
     );
+
+    //Updates the messages state when a new message is written
     const updateMessages = onSnapshot(queryMessages, (snapshot) => {
       let messages = [];
       snapshot.forEach((doc) => {
@@ -69,95 +72,18 @@ export default function Chat() {
     return () => updateMessages();
   }, [room]);
 
-  async function addFriend(otherDisplayName, otherPfp, otherUid) {
-    if (otherUid === userInfo.uid) {
-      console.log("Can't add yourself");
-      return;
-    }
-    updateFriendList(otherUid, otherDisplayName, otherPfp);
-    await updateFriendListUI();
-  }
-  async function updateFriendsList(uid, otherUid, otherDisplayName, otherPfp) {
-    const q = query(usersRef, where("uid", "==", uid));
-    const querySnapshot = await getDocs(q);
-    const roomId = crypto.randomUUID();
-    if (!querySnapshot.empty) {
-      const docRef = doc(usersRef, querySnapshot.docs[0].id);
-      const userDoc = await getDoc(docRef);
-
-      await setDoc(
-        docRef,
-        {
-          friendsList: {
-            ...(userDoc.data()?.friendsList || {}),
-            [otherUid]: {
-              roomId: roomId,
-              displayName: otherDisplayName,
-              pfp: otherPfp,
-            },
-          },
-        },
-        { merge: true }
-      );
-    } else {
-      console.log("Document does not exist");
-    }
-  }
-
-  async function updateFriendList(
-    otherUid,
-    otherDisplayName,
-    otherPfp,
-    roomId
-  ) {
-    await updateFriendsList(
-      userInfo.uid,
-      otherUid,
-      otherDisplayName,
-      otherPfp,
-      roomId
-    );
-    await updateFriendsList(
-      otherUid,
-      userInfo.uid,
-      userInfo.displayName,
-      userInfo.pfp,
-      roomId
-    );
-  }
-
-  async function updateFriendListUI() {
-    // Need display name and friend profile picture
-    const q = query(usersRef, where("uid", "==", userInfo.uid));
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-      const userFriendList = querySnapshot.docs[0].data().friendsList;
-      let userPropertiesArr = Object.entries(userFriendList);
-      userPropertiesArr.map((user) => {
-        const displayName = user[1].displayName;
-        const pfp = user[1].pfp;
-        setFriends((prevValue) => {
-          return [...prevValue, <Friend displayName={displayName} pfp={pfp} />];
-        });
-      });
-    } else {
-      console.log("empty");
-    }
-  }
-  useEffect(() => {
-    const fetchAndUpdateFriendList = async () => {
-      await updateFriendListUI();
-    };
-
-    fetchAndUpdateFriendList();
-  }, [userInfo]);
   function changeRoom(otherUserUid) {
     setRoom(otherUserUid);
   }
+
+  // This function handles the submission of a new chat message.
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (newMessage === "") return;
 
+    // Add a new document to the 'messagesRef' collection in Firestore.
+    // The document contains the message text, the creation timestamp, the user's display name, user ID, profile picture URL, and the room in which the message is sent.
     await addDoc(messagesRef, {
       text: newMessage,
       createdAt: serverTimestamp(),
@@ -167,14 +93,15 @@ export default function Chat() {
       room: room,
     });
 
+    // Clear the new message input field after the message is sent.
     setNewMessage("");
   };
   return (
     <div className="chat-container">
       <div className="header">
-        <Header notFunction={updateFriendListUI} />
+        <Header />
       </div>
-      <div className="friend-list">{friends}</div>
+      <FriendList userInfo={userInfo} />
       <div className="user">
         <img src={userInfo.pfp} alt="" className="user-pfp" />
         <h3 className="display-name">{userInfo.displayName}</h3>
@@ -192,7 +119,6 @@ export default function Chat() {
           </div>
         ))}
       </div>
-      <AddFriend addFriend={addFriend} />
       <form className="chat-message-form" onSubmit={handleSubmit}>
         <input
           placeholder="Type your message here"
